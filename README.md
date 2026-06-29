@@ -82,3 +82,7 @@ Edit `config.toml`: `fps`, `max_frames`, sheet grid (`cols`/`rows`), Whisper `mo
 - `.claude/skills/ad-learnings/` — orchestration skill
 - `bin/setup` — one-time installer/wiring (generates `.mcp.json`, registers the MCP, links skill/agent)
 - `.mcp.json.example` — template; `bin/setup` writes the real `.mcp.json` (gitignored) with local paths
+
+## License
+
+MIT — see [LICENSE](LICENSE).

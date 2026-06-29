@@ -2,6 +2,8 @@
 name = "ads-learnings"
 version = "0.2.0"
 description = "Eyes & ears for Claude Code: ffmpeg contact sheets feed Claude's native vision (eyes), Groq Whisper transcribes (ears MCP). Claude reasons over the bundle for creative + incrementality advice."
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "yt-dlp>=2024.1.0",
