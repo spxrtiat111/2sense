@@ -1,0 +1,9 @@
+{
+  "_comment": "Template only. Run bin/setup to generate the real .mcp.json with your absolute uv + project paths (it is gitignored).",
+  "mcpServers": {
+    "2Sense": {
+      "command": "uv",
+      "args": ["run", "--project", "/ABSOLUTE/PATH/TO/2sense", "ee-ears"]
+    }
+  }
+}

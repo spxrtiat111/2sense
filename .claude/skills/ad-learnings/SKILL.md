@@ -18,7 +18,7 @@ images** — each grid cell is a frame with its timestamp burned in top-left. Lo
 images (eyes) and read the transcript (ears).
 
 - If the `2Sense` MCP isn't connected, tell the user to reconnect MCP / restart, or run
-  the CLI fallback yourself: `/Users/stephanedeprez/ads-learnings-1000/bin/ee prep "<src>"`.
+  the CLI fallback yourself from the repo root: `bin/ee prep "<src>"`.
 - CLI-only optimization for batch/long jobs: instead of the MCP images landing in your
   context, run `ee prep` then spawn the **ad-eyes** sub-agent (`subagent_type: "ad-eyes"`)
   on the sheets dir + manifest; it returns a compact JSON timeline. Use this when

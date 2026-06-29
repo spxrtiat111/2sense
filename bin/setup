@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# One-time setup for 2Sense. Idempotent — safe to re-run.
+# Installs deps, writes a local .mcp.json, wires the MCP into Claude Code + the
+# Desktop app, links the skill/agent, and runs a health check. No hardcoded paths.
+set -euo pipefail
+
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_DIR"
+
+say()  { printf "\n\033[1m== %s\033[0m\n" "$1"; }
+ok()   { printf "  \033[32m✓\033[0m %s\n" "$1"; }
+warn() { printf "  \033[33m!\033[0m %s\n" "$1"; }
+
+# 1. uv ----------------------------------------------------------------------
+say "Checking uv"
+if command -v uv >/dev/null 2>&1; then UV="$(command -v uv)"
+elif [ -x "$HOME/.local/bin/uv" ]; then UV="$HOME/.local/bin/uv"
+else
+  warn "uv not found. Install it, then re-run bin/setup:"
+  warn "  curl -LsSf https://astral.sh/uv/install.sh | sh"
+  exit 1
+fi
+ok "uv: $UV"
+
+# 2. dependencies ------------------------------------------------------------
+say "Installing dependencies (downloads Python 3.12 + TensorFlow on first run)"
+"$UV" sync
+ok "virtualenv ready"
+
+# 3. .env --------------------------------------------------------------------
+say "Environment file"
+if [ -f .env ]; then ok ".env already present"
+else cp .env.example .env; ok "created .env — paste your GROQ_API_KEY"; fi
+
+# 4. local project .mcp.json -------------------------------------------------
+say "Writing project .mcp.json with local paths"
+cat > .mcp.json <<JSON
+{
+  "mcpServers": {
+    "2Sense": {
+      "command": "$UV",
+      "args": ["run", "--project", "$PROJECT_DIR", "ee-ears"]
+    }
+  }
+}
+JSON
+ok ".mcp.json -> ee-ears"
+
+# 5. Claude Code user-scope MCP (best-effort) --------------------------------
+say "Registering 2Sense in Claude Code (user scope)"
+if command -v claude >/dev/null 2>&1; then
+  claude mcp remove 2Sense -s user >/dev/null 2>&1 || true
+  if claude mcp add 2Sense -s user -- "$UV" run --project "$PROJECT_DIR" ee-ears >/dev/null 2>&1; then
+    ok "registered (available in every project)"
+  else
+    warn "auto-register failed; the project .mcp.json still works inside this repo"
+  fi
+else
+  warn "claude CLI not found — skipped (project .mcp.json works when you open this repo in Claude Code)"
+fi
+
+# 6. Claude Desktop app (macOS, best-effort) ---------------------------------
+say "Claude Desktop app config"
+DESK="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+if [ -d "$(dirname "$DESK")" ]; then
+  "$UV" run python - "$DESK" "$UV" "$PROJECT_DIR" <<'PY'
+import json, pathlib, sys
+desk, uv, proj = sys.argv[1], sys.argv[2], sys.argv[3]
+p = pathlib.Path(desk)
+cfg = {}
+if p.exists():
+    try: cfg = json.loads(p.read_text())
+    except Exception: cfg = {}
+cfg.setdefault("mcpServers", {})
+cfg["mcpServers"]["2Sense"] = {
+    "command": uv,
+    "args": ["run", "--project", proj, "ee-ears"],
+    "env": {"PATH": f"{pathlib.Path(uv).parent}:/usr/local/bin:/usr/bin:/bin"},
+}
+p.parent.mkdir(parents=True, exist_ok=True)
+p.write_text(json.dumps(cfg, indent=2))
+PY
+  ok "added 2Sense to Claude Desktop"
+else
+  warn "Claude Desktop not detected — skipped"
+fi
+
+# 7. global skill + agent for Claude Code (best-effort) ----------------------
+say "Linking skill + agent into ~/.claude"
+if [ -d "$HOME/.claude" ]; then
+  mkdir -p "$HOME/.claude/skills" "$HOME/.claude/agents"
+  ln -sfn "$PROJECT_DIR/.claude/skills/ad-learnings" "$HOME/.claude/skills/ad-learnings"
+  ln -sfn "$PROJECT_DIR/.claude/agents/ad-eyes.md" "$HOME/.claude/agents/ad-eyes.md"
+  ok "linked ad-learnings skill + ad-eyes agent"
+else
+  warn "~/.claude not found — skipped (project-local skill/agent still work)"
+fi
+
+# 8. health check ------------------------------------------------------------
+say "Health check"
+"$UV" run ee doc || true
+
+# 9. next steps --------------------------------------------------------------
+say "Done — next steps"
+cat <<NEXT
+  1) Put your Groq key in .env      ->  GROQ_API_KEY=...   (https://console.groq.com/keys)
+  2) Restart Claude Code + the Claude Desktop app so 2Sense loads
+  3) In chat:  "analyze this ad: <path or URL>"
+NEXT
