@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Launches the ears MCP server (Groq Whisper). Referenced by .mcp.json.
+set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec uv run --project "$PROJECT_DIR" ee-ears

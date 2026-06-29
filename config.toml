@@ -1,0 +1,25 @@
+# ads-learnings configuration. Sane defaults; edit to taste.
+
+[frames]
+fps = 3            # frames sampled per second of video (the "eyes" density)
+max_frames = 90    # safety cap (=> at 3x3 sheets, up to 10 contact sheets)
+cell_width = 360   # px width per frame in the contact sheet (OCR-readable, cheap)
+
+[sheets]
+cols = 3           # contact-sheet grid columns
+rows = 3           # contact-sheet grid rows  (cols*rows = frames per sheet)
+label = true       # burn the timestamp onto each cell
+
+[audio]
+sample_rate = 16000  # mono wav sample rate fed to Whisper
+profile = true       # free local music/energy analysis (tempo, energy curve, onsets)
+yamnet = true        # free local YAMNet audio-event tags (music/speech/instruments/genre/SFX)
+
+[ears]
+# Groq Whisper model used by the ears MCP server.
+model = "whisper-large-v3"
+language = "auto"    # "auto" lets Whisper detect; or force "fr", "en", ...
+
+[io]
+out_dir = "data/out"
+downloads_dir = "data/downloads"

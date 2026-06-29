@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "2Sense": {
+      "command": "/Users/stephanedeprez/.local/bin/uv",
+      "args": ["run", "--project", "/Users/stephanedeprez/ads-learnings-1000", "ee-ears"]
+    }
+  }
+}

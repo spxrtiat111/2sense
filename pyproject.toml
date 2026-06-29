@@ -1,0 +1,31 @@
+[project]
+name = "ads-learnings"
+version = "0.2.0"
+description = "Eyes & ears for Claude Code: ffmpeg contact sheets feed Claude's native vision (eyes), Groq Whisper transcribes (ears MCP). Claude reasons over the bundle for creative + incrementality advice."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "yt-dlp>=2024.1.0",
+    "imageio-ffmpeg>=0.5.1",
+    "pillow>=10.3.0",
+    "numpy>=1.26.0",
+    "groq>=0.13.0",
+    "mcp>=1.2.0",
+    "python-dotenv>=1.0.1",
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+    # YAMNet audio-event tagging (lazy-loaded; TF needs Python 3.12)
+    "tensorflow>=2.16.0",
+    "tensorflow-hub>=0.16.0",
+    "setuptools<81",  # tensorflow-hub imports legacy pkg_resources (removed in setuptools 81+)
+]
+
+[project.scripts]
+ee = "eyesears.cli:main"
+ee-ears = "eyesears.mcp_server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/eyesears"]

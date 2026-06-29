@@ -1,0 +1,14 @@
+# secrets
+.env
+
+# python / uv
+.venv/
+__pycache__/
+*.pyc
+.uv/
+
+# data: keep folder structure, ignore contents (videos + generated artifacts)
+data/inbox/*
+data/downloads/*
+data/out/*
+!data/**/.gitkeep
